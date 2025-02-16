@@ -1,0 +1,172 @@
+{
+    "RECORDS": [
+        {
+            "url": "https://kemono.party/fanbox/user/22333059",
+            "artist": "melailai",
+            "type": "Kemono",
+            "latest": "https://kemono.party/fanbox/user/22333059/post/7530888",
+            "destination": "G:\\MyCode\\KMP-Kemono-Downloader-final\\download\\",
+            "config": "{'self': <__main__.KMP object at 0x00000225B02C5FF0>, 'folder': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final\\\\download\\\\', 'unzip': False, 'tcount': 5, 'chunksz': -1, 'ext_blacklist': [], 'timeout': 12, 'http_codes': [], 'post_name_exclusion': [], 'download_server_name_type': False, 'link_name_exclusion': [], 'wait': 5.0, 'db_name': 'KMP.db', 'track': True, 'update': False, 'exclcomments': False, 'exclcontents': False, 'minsize': 0, 'predupe': False, 'prefix': 'https://kemono.party', 'disableprescan': False, 'date': True, 'id': True, 'rename': True, 'tempextr': True, 'root': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final', 'connect_timeout': 10, 'kwargs': {'reupdate': False}}"
+        },
+        {
+            "url": "https://kemono.party/fanbox/user/1710711",
+            "artist": "pspgo",
+            "type": "Kemono",
+            "latest": "https://kemono.party/fanbox/user/1710711/post/7581756",
+            "destination": "G:\\MyCode\\KMP-Kemono-Downloader-final\\download\\",
+            "config": "{'self': <__main__.KMP object at 0x000001FB4610D720>, 'folder': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final\\\\download\\\\', 'unzip': False, 'tcount': 5, 'chunksz': -1, 'ext_blacklist': [], 'timeout': 12, 'http_codes': [], 'post_name_exclusion': [], 'download_server_name_type': False, 'link_name_exclusion': [], 'wait': 5.0, 'db_name': 'KMP.db', 'track': True, 'update': False, 'exclcomments': False, 'exclcontents': False, 'minsize': 0, 'predupe': False, 'prefix': 'https://kemono.party', 'disableprescan': False, 'date': True, 'id': True, 'rename': True, 'tempextr': True, 'root': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final', 'connect_timeout': 10, 'kwargs': {'reupdate': False}}"
+        },
+        {
+            "url": "https://kemono.party/fanbox/user/59336265",
+            "artist": "pottsness",
+            "type": "Kemono",
+            "latest": "https://kemono.party/fanbox/user/59336265/post/7725321",
+            "destination": "G:\\MyCode\\KMP-Kemono-Downloader-final\\download\\",
+            "config": "{'self': <__main__.KMP object at 0x000001D5D7BF21D0>, 'folder': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final\\\\download\\\\', 'unzip': False, 'tcount': 5, 'chunksz': -1, 'ext_blacklist': [], 'timeout': 20, 'http_codes': [], 'post_name_exclusion': [], 'download_server_name_type': False, 'link_name_exclusion': [], 'wait': 8.0, 'db_name': 'KMP.db', 'track': True, 'update': False, 'exclcomments': False, 'exclcontents': False, 'minsize': 0, 'predupe': False, 'prefix': 'https://kemono.party', 'disableprescan': False, 'date': True, 'id': True, 'rename': True, 'tempextr': True, 'root': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final', 'connect_timeout': 10, 'kwargs': {'reupdate': False}}"
+        },
+        {
+            "url": "https://kemono.party/patreon/user/46802018",
+            "artist": "MofuMochii",
+            "type": "Kemono",
+            "latest": "https://kemono.party/patreon/user/46802018/post/110854801",
+            "destination": "G:\\MyCode\\KMP-Kemono-Downloader-final\\download\\",
+            "config": "{'self': <__main__.KMP object at 0x000001D5D7BF21D0>, 'folder': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final\\\\download\\\\', 'unzip': False, 'tcount': 5, 'chunksz': -1, 'ext_blacklist': [], 'timeout': 20, 'http_codes': [], 'post_name_exclusion': [], 'download_server_name_type': False, 'link_name_exclusion': [], 'wait': 8.0, 'db_name': 'KMP.db', 'track': True, 'update': False, 'exclcomments': False, 'exclcontents': False, 'minsize': 0, 'predupe': False, 'prefix': 'https://kemono.party', 'disableprescan': False, 'date': True, 'id': True, 'rename': True, 'tempextr': True, 'root': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final', 'connect_timeout': 10, 'kwargs': {'reupdate': False}}"
+        },
+        {
+            "url": "https://kemono.party/patreon/user/92535202",
+            "artist": "sandstar749",
+            "type": "Kemono",
+            "latest": "https://kemono.party/patreon/user/92535202/post/96842308",
+            "destination": "G:\\MyCode\\KMP-Kemono-Downloader-final\\download\\",
+            "config": "{'self': <__main__.KMP object at 0x000001D5D7BF21D0>, 'folder': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final\\\\download\\\\', 'unzip': False, 'tcount': 5, 'chunksz': -1, 'ext_blacklist': [], 'timeout': 20, 'http_codes': [], 'post_name_exclusion': [], 'download_server_name_type': False, 'link_name_exclusion': [], 'wait': 8.0, 'db_name': 'KMP.db', 'track': True, 'update': False, 'exclcomments': False, 'exclcontents': False, 'minsize': 0, 'predupe': False, 'prefix': 'https://kemono.party', 'disableprescan': False, 'date': True, 'id': True, 'rename': True, 'tempextr': True, 'root': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final', 'connect_timeout': 10, 'kwargs': {'reupdate': False}}"
+        },
+        {
+            "url": "https://kemono.party/fanbox/user/3041039",
+            "artist": "咸鱼喵CAT",
+            "type": "Kemono",
+            "latest": "https://kemono.party/fanbox/user/3041039/post/7909429",
+            "destination": "G:\\MyCode\\KMP-Kemono-Downloader-final\\download\\",
+            "config": "{'self': <__main__.KMP object at 0x0000018F37806020>, 'folder': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final\\\\download\\\\', 'unzip': False, 'tcount': 5, 'chunksz': -1, 'ext_blacklist': [], 'timeout': 10, 'http_codes': [], 'post_name_exclusion': [], 'download_server_name_type': False, 'link_name_exclusion': [], 'wait': 8.0, 'db_name': 'KMP.db', 'track': True, 'update': False, 'exclcomments': False, 'exclcontents': False, 'minsize': 0, 'predupe': False, 'prefix': 'https://kemono.party', 'disableprescan': False, 'date': True, 'id': True, 'rename': True, 'tempextr': True, 'root': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final', 'connect_timeout': 10, 'kwargs': {'reupdate': False}}"
+        },
+        {
+            "url": "https://kemono.party/fanbox/user/35516002",
+            "artist": "aizenpochi",
+            "type": "Kemono",
+            "latest": "https://kemono.party/fanbox/user/35516002/post/7939642",
+            "destination": "G:\\MyCode\\KMP-Kemono-Downloader-final\\download\\",
+            "config": "{'self': <__main__.KMP object at 0x000001F1CF952140>, 'folder': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final\\\\download\\\\', 'unzip': False, 'tcount': 5, 'chunksz': -1, 'ext_blacklist': [], 'timeout': 10, 'http_codes': [], 'post_name_exclusion': [], 'download_server_name_type': False, 'link_name_exclusion': [], 'wait': 8.0, 'db_name': 'KMP.db', 'track': True, 'update': False, 'exclcomments': False, 'exclcontents': False, 'minsize': 0, 'predupe': False, 'prefix': 'https://kemono.party', 'disableprescan': False, 'date': True, 'id': True, 'rename': True, 'tempextr': True, 'root': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final', 'connect_timeout': 10, 'kwargs': {'reupdate': False}}"
+        },
+        {
+            "url": "https://kemono.party/fanbox/user/492048",
+            "artist": "sbfanbo",
+            "type": "Kemono",
+            "latest": "https://kemono.party/fanbox/user/492048/post/7805493",
+            "destination": "G:\\MyCode\\KMP-Kemono-Downloader-final\\download\\",
+            "config": "{'self': <__main__.KMP object at 0x0000017565956050>, 'folder': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final\\\\download\\\\', 'unzip': False, 'tcount': 5, 'chunksz': -1, 'ext_blacklist': [], 'timeout': 10, 'http_codes': [], 'post_name_exclusion': [], 'download_server_name_type': False, 'link_name_exclusion': [], 'wait': 8.0, 'db_name': 'KMP.db', 'track': True, 'update': False, 'exclcomments': False, 'exclcontents': False, 'minsize': 0, 'predupe': False, 'prefix': 'https://kemono.party', 'disableprescan': False, 'date': True, 'id': True, 'rename': True, 'tempextr': True, 'root': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final', 'connect_timeout': 10, 'kwargs': {'reupdate': False}}"
+        },
+        {
+            "url": "https://kemono.party/fanbox/user/767724",
+            "artist": "mikozinn",
+            "type": "Kemono",
+            "latest": "https://kemono.party/fanbox/user/767724/post/8106106",
+            "destination": "G:\\MyCode\\KMP-Kemono-Downloader-final\\download\\",
+            "config": "{'self': <__main__.KMP object at 0x000001D5D7BF21D0>, 'folder': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final\\\\download\\\\', 'unzip': False, 'tcount': 5, 'chunksz': -1, 'ext_blacklist': [], 'timeout': 20, 'http_codes': [], 'post_name_exclusion': [], 'download_server_name_type': False, 'link_name_exclusion': [], 'wait': 8.0, 'db_name': 'KMP.db', 'track': True, 'update': False, 'exclcomments': False, 'exclcontents': False, 'minsize': 0, 'predupe': False, 'prefix': 'https://kemono.party', 'disableprescan': False, 'date': True, 'id': True, 'rename': True, 'tempextr': True, 'root': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final', 'connect_timeout': 10, 'kwargs': {'reupdate': False}}"
+        },
+        {
+            "url": "https://kemono.party/fanbox/user/54698934",
+            "artist": "hi-geepon",
+            "type": "Kemono",
+            "latest": "https://kemono.party/fanbox/user/54698934/post/7983867",
+            "destination": "G:\\MyCode\\KMP-Kemono-Downloader-final\\download\\",
+            "config": "{'self': <__main__.KMP object at 0x000001FB4610D720>, 'folder': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final\\\\download\\\\', 'unzip': False, 'tcount': 5, 'chunksz': -1, 'ext_blacklist': [], 'timeout': 12, 'http_codes': [], 'post_name_exclusion': [], 'download_server_name_type': False, 'link_name_exclusion': [], 'wait': 5.0, 'db_name': 'KMP.db', 'track': True, 'update': False, 'exclcomments': False, 'exclcontents': False, 'minsize': 0, 'predupe': False, 'prefix': 'https://kemono.party', 'disableprescan': False, 'date': True, 'id': True, 'rename': True, 'tempextr': True, 'root': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final', 'connect_timeout': 10, 'kwargs': {'reupdate': False}}"
+        },
+        {
+            "url": "https://kemono.party/fanbox/user/17722960",
+            "artist": "vierzeck",
+            "type": "Kemono",
+            "latest": "https://kemono.party/fanbox/user/17722960/post/7916181",
+            "destination": "G:\\MyCode\\KMP-Kemono-Downloader-final\\download\\",
+            "config": "{'self': <__main__.KMP object at 0x000001AAACCFE170>, 'folder': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final\\\\download\\\\', 'unzip': False, 'tcount': 5, 'chunksz': -1, 'ext_blacklist': [], 'timeout': 10, 'http_codes': [], 'post_name_exclusion': [], 'download_server_name_type': False, 'link_name_exclusion': [], 'wait': 8.0, 'db_name': 'KMP.db', 'track': True, 'update': False, 'exclcomments': False, 'exclcontents': False, 'minsize': 0, 'predupe': False, 'prefix': 'https://kemono.party', 'disableprescan': False, 'date': True, 'id': True, 'rename': True, 'tempextr': True, 'root': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final', 'connect_timeout': 10, 'kwargs': {'reupdate': False}}"
+        },
+        {
+            "url": "https://kemono.party/fanbox/user/16731",
+            "artist": "kedamaa",
+            "type": "Kemono",
+            "latest": "https://kemono.party/fanbox/user/16731/post/8002476",
+            "destination": "G:\\MyCode\\KMP-Kemono-Downloader-final\\download\\",
+            "config": "{'self': <__main__.KMP object at 0x000001AAACCFE170>, 'folder': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final\\\\download\\\\', 'unzip': False, 'tcount': 5, 'chunksz': -1, 'ext_blacklist': [], 'timeout': 10, 'http_codes': [], 'post_name_exclusion': [], 'download_server_name_type': False, 'link_name_exclusion': [], 'wait': 8.0, 'db_name': 'KMP.db', 'track': True, 'update': False, 'exclcomments': False, 'exclcontents': False, 'minsize': 0, 'predupe': False, 'prefix': 'https://kemono.party', 'disableprescan': False, 'date': True, 'id': True, 'rename': True, 'tempextr': True, 'root': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final', 'connect_timeout': 10, 'kwargs': {'reupdate': False}}"
+        },
+        {
+            "url": "https://kemono.party/patreon/user/69653195",
+            "artist": "houkisei",
+            "type": "Kemono",
+            "latest": "https://kemono.party/patreon/user/69653195/post/110504859",
+            "destination": "G:\\MyCode\\KMP-Kemono-Downloader-final\\download\\",
+            "config": "{'self': <__main__.KMP object at 0x000001AAACCFE170>, 'folder': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final\\\\download\\\\', 'unzip': False, 'tcount': 5, 'chunksz': -1, 'ext_blacklist': [], 'timeout': 10, 'http_codes': [], 'post_name_exclusion': [], 'download_server_name_type': False, 'link_name_exclusion': [], 'wait': 8.0, 'db_name': 'KMP.db', 'track': True, 'update': False, 'exclcomments': False, 'exclcontents': False, 'minsize': 0, 'predupe': False, 'prefix': 'https://kemono.party', 'disableprescan': False, 'date': True, 'id': True, 'rename': True, 'tempextr': True, 'root': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final', 'connect_timeout': 10, 'kwargs': {'reupdate': False}}"
+        },
+        {
+            "url": "https://kemono.party/patreon/user/57010059",
+            "artist": "hongbai",
+            "type": "Kemono",
+            "latest": "https://kemono.party/patreon/user/57010059/post/96226173",
+            "destination": "G:\\MyCode\\KMP-Kemono-Downloader-final\\download\\",
+            "config": "{'self': <__main__.KMP object at 0x000001AAACCFE170>, 'folder': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final\\\\download\\\\', 'unzip': False, 'tcount': 5, 'chunksz': -1, 'ext_blacklist': [], 'timeout': 10, 'http_codes': [], 'post_name_exclusion': [], 'download_server_name_type': False, 'link_name_exclusion': [], 'wait': 8.0, 'db_name': 'KMP.db', 'track': True, 'update': False, 'exclcomments': False, 'exclcontents': False, 'minsize': 0, 'predupe': False, 'prefix': 'https://kemono.party', 'disableprescan': False, 'date': True, 'id': True, 'rename': True, 'tempextr': True, 'root': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final', 'connect_timeout': 10, 'kwargs': {'reupdate': False}}"
+        },
+        {
+            "url": "https://kemono.party/patreon/user/7303006",
+            "artist": "Kacyu",
+            "type": "Kemono",
+            "latest": "https://kemono.party/patreon/user/7303006/post/102429322",
+            "destination": "G:\\MyCode\\KMP-Kemono-Downloader-final\\download\\",
+            "config": "{'self': <__main__.KMP object at 0x000001C436A2E0B0>, 'folder': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final\\\\download\\\\', 'unzip': False, 'tcount': 5, 'chunksz': -1, 'ext_blacklist': [], 'timeout': 10, 'http_codes': [], 'post_name_exclusion': [], 'download_server_name_type': False, 'link_name_exclusion': [], 'wait': 8.0, 'db_name': 'KMP.db', 'track': True, 'update': False, 'exclcomments': False, 'exclcontents': False, 'minsize': 0, 'predupe': False, 'prefix': 'https://kemono.party', 'disableprescan': False, 'date': True, 'id': True, 'rename': True, 'tempextr': True, 'root': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final', 'connect_timeout': 10, 'kwargs': {'reupdate': False}}"
+        },
+        {
+            "url": "https://kemono.party/patreon/user/15084132",
+            "artist": "slashsoft",
+            "type": "Kemono",
+            "latest": "https://kemono.party/patreon/user/15084132/post/109176034",
+            "destination": "G:\\MyCode\\KMP-Kemono-Downloader-final\\download\\",
+            "config": "{'self': <__main__.KMP object at 0x0000020E7F11DF30>, 'folder': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final\\\\download\\\\', 'unzip': False, 'tcount': 5, 'chunksz': -1, 'ext_blacklist': [], 'timeout': 10, 'http_codes': [], 'post_name_exclusion': [], 'download_server_name_type': False, 'link_name_exclusion': [], 'wait': 8.0, 'db_name': 'KMP.db', 'track': True, 'update': False, 'exclcomments': False, 'exclcontents': False, 'minsize': 0, 'predupe': False, 'prefix': 'https://kemono.party', 'disableprescan': False, 'date': True, 'id': True, 'rename': True, 'tempextr': True, 'root': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final', 'connect_timeout': 10, 'kwargs': {'reupdate': False}}"
+        },
+        {
+            "url": "https://kemono.party/fanbox/user/258003",
+            "artist": "moehime",
+            "type": "Kemono",
+            "latest": "https://kemono.party/fanbox/user/258003/post/8117192",
+            "destination": "G:\\MyCode\\KMP-Kemono-Downloader-final\\download\\",
+            "config": "{'self': <__main__.KMP object at 0x0000027E4C8EDCC0>, 'folder': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final\\\\download\\\\', 'unzip': False, 'tcount': 5, 'chunksz': -1, 'ext_blacklist': [], 'timeout': 10, 'http_codes': [], 'post_name_exclusion': [], 'download_server_name_type': False, 'link_name_exclusion': [], 'wait': 8.0, 'db_name': 'KMP.db', 'track': True, 'update': False, 'exclcomments': False, 'exclcontents': False, 'minsize': 0, 'predupe': False, 'prefix': 'https://kemono.party', 'disableprescan': False, 'date': True, 'id': True, 'rename': True, 'tempextr': True, 'root': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final', 'connect_timeout': 10, 'kwargs': {'reupdate': False}}"
+        },
+        {
+            "url": "https://kemono.party/fanbox/user/4234383",
+            "artist": "muk-monsieur",
+            "type": "Kemono",
+            "latest": "https://kemono.party/fanbox/user/4234383/post/8053568",
+            "destination": "G:\\MyCode\\KMP-Kemono-Downloader-final\\download\\",
+            "config": "{'self': <__main__.KMP object at 0x0000027E4C8EDCC0>, 'folder': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final\\\\download\\\\', 'unzip': False, 'tcount': 5, 'chunksz': -1, 'ext_blacklist': [], 'timeout': 10, 'http_codes': [], 'post_name_exclusion': [], 'download_server_name_type': False, 'link_name_exclusion': [], 'wait': 8.0, 'db_name': 'KMP.db', 'track': True, 'update': False, 'exclcomments': False, 'exclcontents': False, 'minsize': 0, 'predupe': False, 'prefix': 'https://kemono.party', 'disableprescan': False, 'date': True, 'id': True, 'rename': True, 'tempextr': True, 'root': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final', 'connect_timeout': 10, 'kwargs': {'reupdate': False}}"
+        },
+        {
+            "url": "https://kemono.party/fanbox/user/1977144",
+            "artist": "nanikairu",
+            "type": "Kemono",
+            "latest": "https://kemono.party/fanbox/user/1977144/post/8137944",
+            "destination": "G:\\MyCode\\KMP-Kemono-Downloader-final\\download\\",
+            "config": "{'self': <__main__.KMP object at 0x00000183FEACDC30>, 'folder': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final\\\\download\\\\', 'unzip': False, 'tcount': 5, 'chunksz': -1, 'ext_blacklist': [], 'timeout': 10, 'http_codes': [], 'post_name_exclusion': [], 'download_server_name_type': False, 'link_name_exclusion': [], 'wait': 8.0, 'db_name': 'KMP.db', 'track': True, 'update': False, 'exclcomments': False, 'exclcontents': False, 'minsize': 0, 'predupe': False, 'prefix': 'https://kemono.party', 'disableprescan': False, 'date': True, 'id': True, 'rename': True, 'tempextr': True, 'root': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final', 'connect_timeout': 10, 'kwargs': {'reupdate': False}}"
+        },
+        {
+            "url": "https://kemono.party/fanbox/user/236592",
+            "artist": "さき千鈴",
+            "type": "Kemono",
+            "latest": "https://kemono.party/fanbox/user/236592/post/8057352",
+            "destination": "G:\\MyCode\\KMP-Kemono-Downloader-final\\download\\",
+            "config": "{'self': <__main__.KMP object at 0x00000239DC6DE1A0>, 'folder': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final\\\\download\\\\', 'unzip': False, 'tcount': 5, 'chunksz': -1, 'ext_blacklist': [], 'timeout': 10, 'http_codes': [], 'post_name_exclusion': [], 'download_server_name_type': False, 'link_name_exclusion': [], 'wait': 8.0, 'db_name': 'KMP.db', 'track': True, 'update': False, 'exclcomments': False, 'exclcontents': False, 'minsize': 0, 'predupe': False, 'prefix': 'https://kemono.party', 'disableprescan': False, 'date': True, 'id': True, 'rename': True, 'tempextr': True, 'root': 'G:\\\\MyCode\\\\KMP-Kemono-Downloader-final', 'connect_timeout': 10, 'kwargs': {'reupdate': False}}"
+        },
+        {
+            "url": "https://kemono.su/fanbox/user/59275588",
+            "artist": "biya1024",
+            "type": "Kemono",
+            "latest": "https://kemono.party/fanbox/user/59275588/post/9150589",
+            "destination": "G:\\CloneCode_1\\KMP-Kemono-Downloader-final\\download\\",
+            "config": "{'self': <__main__.KMP object at 0x000001E6F4149870>, 'folder': 'G:\\\\CloneCode_1\\\\KMP-Kemono-Downloader-final\\\\download\\\\', 'unzip': False, 'tcount': 5, 'chunksz': -1, 'ext_blacklist': [], 'timeout': 10, 'http_codes': [], 'post_name_exclusion': [], 'download_server_name_type': False, 'link_name_exclusion': [], 'wait': 8.0, 'db_name': 'KMP.db', 'track': True, 'update': False, 'exclcomments': False, 'exclcontents': False, 'minsize': 0, 'predupe': False, 'prefix': 'https://kemono.party', 'disableprescan': False, 'date': True, 'id': True, 'rename': True, 'tempextr': True, 'root': 'G:\\\\CloneCode_1\\\\KMP-Kemono-Downloader-final', 'connect_timeout': 10, 'kwargs': {'reupdate': False}}"
+        }
+    ]
+}

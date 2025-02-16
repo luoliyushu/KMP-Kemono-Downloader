@@ -31,6 +31,9 @@ from PersistentCounter import PersistentCounter
 import jutils
 from DB import DB
 
+from fetch_dynamic import fetch_dynamic_content
+
+
 
 """
 Simple kemono.party downloader relying on html parsing and download by url
@@ -1138,7 +1141,8 @@ class KMP:
         reqs = None
         while not reqs:
             try:
-                reqs = self.__session.get(url, timeout=10, headers=request_headers)
+                # reqs = self.__session.get(url, timeout=10, headers=request_headers)
+                reqs = fetch_dynamic_content(url, timeout=25, headers=request_headers, root_selector="main#main") # 我修改的代码
             except requests.exceptions.Timeout:
                 logging.warning("Connection timed out, this may be due to CAPTCHA, please open Kemono and solve the captcha, program will sleep for 20 seconds")
                 time.sleep(20)
@@ -1154,7 +1158,8 @@ class KMP:
             reqs = None
             while not reqs:
                 try:
-                    reqs = self.__session.get(url, timeout=10, headers=request_headers)
+                    # reqs = self.__session.get(url, timeout=10, headers=request_headers)
+                    reqs = fetch_dynamic_content(url, timeout=25, headers=request_headers, root_selector="main#main") # 我修改的代码
                 except requests.exceptions.Timeout:
                     logging.warning("Connection timed out, this may be due to CAPTCHA, please open Kemono and solve the captcha, program will sleep for 20 seconds")
                     time.sleep(20)
@@ -1292,19 +1297,19 @@ class KMP:
                     # Nested content
                     containers = content.find_all("div")
                     prev = None     # Used to get the entire div, not the internal nested divs
-                    
+                    # 我修改的代码
                     if containers:
                         for container in containers:  
                             # Ignore empty containers
                             if len(container.contents) > 0:
-                                                          
-                                # check if the current container is nested within the previous one
-                                if not prev or (prev and container.contents[0] not in prev):
-                                    # if not, write to file
-                                    post_contents += ("\n" + "Embedded Container: {}".format(container.contents[0]))
                                 
-                                # update prev
-                                prev = container.contents[0]
+                                # Check if the current container is nested within the previous one
+                                if not prev or (prev and not prev.find(container)):
+                                    # If not, write to file
+                                    post_contents += ("\n" + "Embedded Container: {}".format(container.get_text(strip=True)))
+                                
+                                # Update prev
+                                prev = container
                     
                     hashed = hash(post_contents)
                     writable = self.__dupe_file_procedure(titleDir + work_name + "post__content.txt", org_titleDir + org_work_name + "post__content.txt", hashed)
@@ -1460,7 +1465,8 @@ class KMP:
         # Make a connection
         while not reqs:
             try:
-                reqs = self.__session.get(url, timeout=10, headers=request_headers)
+                # reqs = self.__session.get(url, timeout=10, headers=request_headers)
+                reqs = fetch_dynamic_content(url, timeout=25, headers=request_headers, root_selector="main#main") # 我修改的代码
             except requests.exceptions.Timeout:
                 logging.warning("Connection timed out, this may be due to CAPTCHA, please open Kemono and solve the captcha, program will sleep for 20 seconds")
                 time.sleep(20)
@@ -1517,7 +1523,8 @@ class KMP:
                 reqs = None
                 while not reqs:
                     try:
-                        reqs = self.__session.get(url + suffix + str(counter), timeout=10, headers=request_headers)
+                        # reqs = self.__session.get(url + suffix + str(counter), timeout=10, headers=request_headers)
+                        reqs = fetch_dynamic_content(url + suffix + str(counter), timeout=25, headers=request_headers, root_selector="main#main") # 我修改的代码
                     except requests.exceptions.Timeout:
                         logging.warning("Connection timed out, this may be due to CAPTCHA, please open Kemono and solve the captcha, program will sleep for 20 seconds")
                         time.sleep(20)
@@ -1724,7 +1731,8 @@ class KMP:
             reqs = None
             while not reqs:
                 try:
-                    reqs = self.__session.get(url, timeout=10, headers=request_headers)
+                    # reqs = self.__session.get(url, timeout=10, headers=request_headers)
+                    reqs = fetch_dynamic_content(url, timeout=25, headers=request_headers, root_selector="main#main") # 我修改的代码
                 except requests.exceptions.Timeout:
                     logging.warning("Connection timed out, this may be due to CAPTCHA, please open Kemono and solve the captcha, program will sleep for 20 seconds")
                     time.sleep(20)
