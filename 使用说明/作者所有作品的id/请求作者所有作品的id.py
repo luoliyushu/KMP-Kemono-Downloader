@@ -5,26 +5,18 @@ import json
 # https://kemono.su/api/v1/fanbox/user/1977144/posts-legacy?o=100
 # https://kemono.su/api/v1/patreon/user/12733350/posts-legacy?o=50
 # 手动输入
-# authors = [
-#     ("fanbox", 3041039),
-#     ("fanbox", 492048),
-#     ("fanbox", 767724),
-#     ("fanbox", 16731),
-#     ("patreon", 7303006),
-#     ("fanbox", 258003),
-#     ("fanbox", 4234383),
-#     ("fanbox", 1977144),
-#     ("fanbox", 236592),
-# ]
+authors = [
+    ("fanbox", 38870890),
+]
 
-# 自动输入
-authors = []
-with open(r"G:\CloneCode_1\KMP-Kemono-Downloader-final\使用说明\数据库备份\Parent2_2025-02-14.json", "r", encoding="utf-8") as f:
-    json_data = json.load(f).get("RECORDS")
-    for item in json_data:
-        url_split = item.get("url").split("/")
-        if url_split[-3] and url_split[-1]:
-            authors.append((url_split[-3], int(url_split[-1])))
+# # 自动输入
+# authors = []
+# with open(r"G:\CloneCode_1\KMP-Kemono-Downloader\使用说明\数据库备份\Parent2_2025-02-22.json", "r", encoding="utf-8") as f:
+#     json_data = json.load(f).get("RECORDS")
+#     for item in json_data:
+#         url_split = item.get("url").split("/")
+#         if url_split[-3] and url_split[-1]:
+#             authors.append((url_split[-3], int(url_split[-1])))
 
 
        

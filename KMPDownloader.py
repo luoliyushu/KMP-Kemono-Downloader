@@ -898,7 +898,7 @@ class KMP:
                 src = href if "http" in href  else self.__container_prefix + href
             # Type 2 image - Image in Content section
             else:
-                target = link.get('src')
+                target = link.get('src') or "" # 我修改的代码
                # Polluted link check, Fanbox is notorious for this
                # Curiously, src can be None as a string
                 if "downloads.fanbox" not in target and target != "None":

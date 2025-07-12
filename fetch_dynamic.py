@@ -196,11 +196,14 @@ class PageOperations:
     @retry_operation()
     def load_comments(driver, timeout, **kwargs):
         """等待评论加载完成"""
-        footer = driver.find_element(By.CSS_SELECTOR, "footer.post__footer")
-        if "Loading comments" in footer.text:
-            WebDriverWait(driver, timeout).until_not(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "footer.post__footer>p"))
-            )
+        try:
+            footer = driver.find_element(By.CSS_SELECTOR, "footer.post__footer")
+            if "Loading comments" in footer.text:
+                WebDriverWait(driver, timeout).until_not(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "footer.post__footer>p"))
+                )
+        except NoSuchElementException:
+            print("该页面不存在评论区")
 
     @staticmethod
     @retry_operation()

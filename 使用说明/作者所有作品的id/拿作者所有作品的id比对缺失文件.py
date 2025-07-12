@@ -7,12 +7,12 @@ import os
 # 自动添加
 compare_list = []
 auto_path = r"使用说明\作者所有作品的id" # [492048_sbfanbo_fanbox.txt, 3041039_咸鱼喵CAT_fanbox.txt]
-dir_path = r"G:\CloneCode_1\KMP-Kemono-Downloader-final\download"
+dir_path = r"G:\CloneCode_1\KMP-Kemono-Downloader\download"
 for i in os.listdir(auto_path):
     if i != "example_缺少.txt" and i.endswith(".txt"):
         compare_list.append((
             os.path.join(auto_path, i), 
-            os.path.join(dir_path, i.split("_")[1])
+            os.path.join(dir_path, i.split("_")[1].replace("＠", ""))
             ))
 
 
