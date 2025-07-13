@@ -204,6 +204,8 @@ class PageOperations:
                 )
         except NoSuchElementException:
             print("该页面不存在评论区")
+        except Exception as e:
+            logger.warning(f"等待评论失败，继续执行: {str(e)}")
 
     @staticmethod
     @retry_operation()
@@ -316,6 +318,9 @@ def fetch_dynamic_content(
             
             logger.info(f"等待 {retry_delay} 秒后进行第 {max_retries - retry_count} 次重试...")
             time.sleep(retry_delay)
+        finally:
+            if driver:
+                driver.quit()
 
 # 使用示例
 if __name__ == "__main__":
