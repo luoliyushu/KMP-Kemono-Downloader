@@ -31,13 +31,13 @@ def setup_logging():
         tuple: (logger对象, chrome日志文件路径)
     """
     # 创建logs目录（如果不存在）
-    if not os.path.exists('logs'):
-        os.makedirs('logs')
+    if not os.path.exists('chrome_logs'):
+        os.makedirs('chrome_logs')
     
     # 生成带时间戳的日志文件名
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    log_file = f'logs/selenium_{timestamp}.log'
-    chrome_log_file = f'logs/chrome_{timestamp}.log'
+    log_file = f'chrome_logs/selenium_{timestamp}.log'
+    chrome_log_file = f'chrome_logs/chrome_{timestamp}.log'
     
     # 配置日志记录器
     logging.basicConfig(
