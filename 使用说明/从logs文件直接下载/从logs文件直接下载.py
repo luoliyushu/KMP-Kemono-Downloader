@@ -19,7 +19,7 @@ from mymodule import download_file, size_display
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # 输入 txt
-INPUT_TXT = os.path.join(BASE_DIR, r"F:\CloneCode_2\KMP-Kemono-Downloader\logs\LOG - Wed Jul 16 12-06-41 UTC 2025.txt")
+INPUT_TXT = os.path.join(BASE_DIR, r"F:\CloneCode_2\KMP-Kemono-Downloader\logs\LOG - Thu Jul 17 15-17-46 UTC 2025.txt")
 
 # 已下载记录（JSON）
 DOWNLOADED_JSON = os.path.join(BASE_DIR, "downloaded.json")
@@ -39,7 +39,7 @@ LINE_PATTERN = re.compile(
 # 下载函数参数（与 download_file 通用）
 PROXIES = None
 HEADERS = {"user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"}
-MAX_RETRIES = 30
+MAX_RETRIES = 60
 MAX_DOWNLOAD_SECONDS = 30
 PLAY_SOUND = False
 CHUNK_SIZE = 8192
