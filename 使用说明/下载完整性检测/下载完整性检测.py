@@ -7,8 +7,8 @@
       - attachments < 本地文件数 → 检查是否存在“0.*”文件，忽略后再比，仍不匹配则记录
       - attachments == 本地文件数 → 跳过
     支持两种模式：
-      1. 从 JSON 文件读取目录列表（JSON 中需有 "empty_dirs" 列表）
-      2. 手动输入根目录，递归收集以数字开头的子目录
+      1. 手动模式：输入根目录和 api_base
+      2. 自动模式：读取 JSON 文件，自动派生根目录与 api_base
     每检测完一个目录即刻写入 processed_dirs.json，下次运行跳过
     异常目录汇总到 results_summary.txt，异常 URL 列表写入 exception_urls.txt，
     所有错误写入 error_log.txt。
@@ -23,8 +23,8 @@ import json
 import re
 import logging
 import traceback
-from urllib.parse import urljoin
 import time
+from urllib.parse import urljoin, urlparse
 
 # 检查并导入 requests 库
 try:
@@ -32,6 +32,13 @@ try:
 except ImportError:
     print("缺少 requests 库，请先运行：pip install requests")
     sys.exit(1)
+
+# 全局请求头
+HEADERS = {
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                  "AppleWebKit/537.36 (KHTML, like Gecko) "
+                  "Chrome/138.0.0.0 Safari/537.36"
+}
 
 def setup_logger(log_path):
     """
@@ -47,19 +54,38 @@ def setup_logger(log_path):
 
 def prompt_mode():
     """
-    提示运行模式：
-      1. 从 JSON 文件读取目录列表（默认）
-      2. 手动输入根目录，递归收集子目录
+    提示选择运行模式：
+      1=手动模式；2=自动模式
     """
     while True:
-        m = input("请选择模式 (1=JSON 文件; 2=手动目录)【默认1】：").strip()
+        m = input("请选择模式 (1=手动; 2=自动)【默认1】：").strip()
         if m in ('', '1', '2'):
             return '1' if m in ('', '1') else '2'
         print("请输入 1 或 2。")
 
+def prompt_manual_inputs():
+    """
+    手动模式：
+      输入根目录 root_dir
+      输入 api_base（形如 https://xxx/api/v1/.../post/，末尾需 '/')
+    """
+    while True:
+        rd = input("请输入根目录路径：").strip()
+        if os.path.isdir(rd):
+            root_dir = os.path.abspath(rd)
+            break
+        print(f"无效目录：{rd}")
+    while True:
+        ab = input("请输入 api_base（末尾需 '/'）：").strip()
+        if ab.endswith('/'):
+            api_base = ab
+            break
+        print("api_base 必须以 '/' 结尾。")
+    return root_dir, api_base
+
 def prompt_json_path(default):
     """
-    提示 JSON 文件路径，回车使用默认
+    自动模式：提示 JSON 文件路径，回车使用默认
     """
     while True:
         p = input(f"请输入 JSON 文件路径（回车默认：{default}）：").strip()
@@ -70,32 +96,32 @@ def prompt_json_path(default):
             return p
         print(f"无效文件：{p}")
 
-def load_dirs_from_json(json_path):
+def load_records_from_json(json_path):
     """
-    从 JSON 文件读取 "empty_dirs" 列表
+    从 JSON 文件读取 RECORDS 列表
     """
     try:
         with open(json_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-        dirs = data.get("empty_dirs")
-        if not isinstance(dirs, list):
-            raise ValueError('"empty_dirs" 字段缺失或非列表')
-        return dirs
+        recs = data.get("RECORDS")
+        if not isinstance(recs, list):
+            raise ValueError('"RECORDS" 字段缺失或非列表')
+        return recs
     except Exception as e:
         raise RuntimeError(f"加载 JSON 失败：{e}")
 
-def prompt_root_dir(default):
+def derive_api_base(user_url):
     """
-    提示根目录路径，回车使用默认
+    根据用户页面 URL 计算 api_base
+      输入示例：https://kemono.party/fanbox/user/22333059
+      输出示例：https://kemono.su/api/v1/fanbox/user/22333059/post/
     """
-    while True:
-        p = input(f"请输入根目录路径（回车默认：{default}）：").strip()
-        if not p:
-            p = default
-        p = os.path.abspath(os.path.expanduser(p))
-        if os.path.isdir(p):
-            return p
-        print(f"无效目录：{p}")
+    parsed = urlparse(user_url)
+    scheme = parsed.scheme or 'https'
+    path = parsed.path.rstrip('/')
+    # 固定域名为 kemono.su
+    api_base = f"{scheme}://kemono.su/api/v1{path}/post/"
+    return api_base
 
 def collect_post_dirs(root_dir):
     """
@@ -139,12 +165,12 @@ def count_local_files(dir_path):
 def fetch_attachments(api_base, post_id, timeout=20, max_retries=30, backoff=3):
     """
     GET {api_base}{post_id} 并返回 post.attachments 列表
-    超时重试 max_retries 次，每次等待 backoff 秒
+    添加自定义请求头，超时重试 max_retries 次，每次等待 backoff 秒
     """
     url = urljoin(api_base, post_id)
     for attempt in range(1, max_retries+1):
         try:
-            resp = requests.get(url, timeout=timeout)
+            resp = requests.get(url, timeout=timeout, headers=HEADERS)
             resp.raise_for_status()
             data = resp.json()
             atts = data.get("post", {}).get("attachments", [])
@@ -152,7 +178,6 @@ def fetch_attachments(api_base, post_id, timeout=20, max_retries=30, backoff=3):
         except requests.exceptions.Timeout:
             print(f"  超时重试 {attempt}/{max_retries} ...")
             time.sleep(backoff)
-            continue
         except requests.exceptions.RequestException as e:
             # 非超时的请求错误直接抛出
             raise RuntimeError(f"请求失败 [post_id={post_id}]: {e}")
@@ -188,9 +213,9 @@ def append_processed(json_path, dir_path):
         logging.error(traceback.format_exc())
 
 def main():
-    # 基础路径配置
+    # 脚本文件夹 & 默认文件路径
     script_dir     = os.path.dirname(os.path.abspath(__file__))
-    default_json   = os.path.join(script_dir, 'results.json')
+    default_json   = os.path.join(script_dir, 'records.json')
     log_file       = os.path.join(script_dir, 'error_log.txt')
     summary_file   = os.path.join(script_dir, 'results_summary.txt')
     processed_file = os.path.join(script_dir, 'processed_dirs.json')
@@ -200,21 +225,46 @@ def main():
 
     # 选择模式并获取目录列表
     mode = prompt_mode()
-    try:
-        if mode == '1':
-            json_path = prompt_json_path(default_json)
-            all_dirs = load_dirs_from_json(json_path)
-        else:
-            root_dir = prompt_root_dir(script_dir)
-            all_dirs = collect_post_dirs(root_dir)
-    except Exception:
-        logging.error(traceback.format_exc())
-        print("初始化目录列表失败，请查看 error_log.txt")
-        sys.exit(1)
+
+    # 存放待检测的 (目录, api_base) 对
+    to_test = []
+
+    if mode == '1':
+        # 手动模式
+        root_dir, api_base = prompt_manual_inputs()
+        all_dirs = collect_post_dirs(root_dir)
+        to_test = [(d, api_base) for d in all_dirs]
+
+    else:
+        # 自动模式
+        json_path = prompt_json_path(default_json)
+        try:
+            records = load_records_from_json(json_path)
+        except Exception as e:
+            logging.error(traceback.format_exc())
+            print("加载 RECORDS 失败，请查看 error_log.txt")
+            sys.exit(1)
+
+        # 逐条记录生成 (目录, api_base)
+        for rec in records:
+            try:
+                user_url    = rec['url']
+                artist      = rec['artist']
+                destination = rec['destination']
+                # 生成 api_base
+                api_base = derive_api_base(user_url)
+                # 根目录 = destination/artist
+                root_dir = os.path.join(destination, artist)
+                dirs = collect_post_dirs(root_dir)
+                to_test.extend([(d, api_base) for d in dirs])
+            except Exception as e:
+                logging.error(f"自动模式处理记录失败 [{rec}]: {e}")
+                logging.error(traceback.format_exc())
 
     # 过滤已处理目录
     processed = set(load_processed(processed_file))
-    to_test = [d for d in all_dirs if d not in processed]
+    to_test = [(d, a) for (d, a) in to_test if d not in processed]
+
     if not to_test:
         print("没有新目录需要检测，程序退出。")
         return
@@ -227,12 +277,10 @@ def main():
     # 清空或创建 exception_urls.txt
     open(exception_file, 'w', encoding='utf-8').close()
 
-    # API 基础 URL（末尾需 '/')
-    api_base = "https://xxxxxx.xx/api/v1/xxxxxxx/user/xxxxxxx/post/"
-
     total = len(to_test)
-    # 5. 逐个检测并即时记录
-    for idx, dpath in enumerate(to_test, start=1):
+
+    # 逐个检测
+    for idx, (dpath, api_base) in enumerate(to_test, start=1):
         print(f"[{idx}/{total}] 检测：{dpath}")
         try:
             pid       = extract_post_id(dpath)

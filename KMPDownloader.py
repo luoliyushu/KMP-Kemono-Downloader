@@ -42,7 +42,9 @@ Using multithreading
 @version 0.6.2.3
 @last modified 9/10/2023
 """
-request_headers = {}                                                                                            # Headers to be used for python requests, modified later on since is constantly changing
+request_headers = {
+    "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+}                                                                                            # Headers to be used for python requests, modified later on since is constantly changing
 LOG_PATH = os.path.abspath(".") + "\\logs\\"                                                                    # Directory for logging
 LOG_NAME = LOG_PATH + "LOG - " + datetime.now(tz = timezone.utc).strftime('%a %b %d %H-%M-%S %Z %Y') +  ".txt"  # Name for log file to use
 LOG_MUTEX = Lock()                                                                                              # Mutex for log file

@@ -19,7 +19,7 @@ from mymodule import download_file, size_display
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # 输入 txt
-INPUT_TXT = os.path.join(BASE_DIR, r"F:\CloneCode_2\KMP-Kemono-Downloader\logs\LOG - Tue Jul 15 09-47-41 UTC 2025.txt")
+INPUT_TXT = os.path.join(BASE_DIR, r"F:\CloneCode_2\KMP-Kemono-Downloader\logs\LOG - Wed Jul 16 12-06-41 UTC 2025.txt")
 
 # 已下载记录（JSON）
 DOWNLOADED_JSON = os.path.join(BASE_DIR, "downloaded.json")
@@ -155,7 +155,7 @@ def main():
 
         try:
             ensure_directory(parent_dir)
-            download_file(
+            download_result = download_file(
                 url=url,
                 filename=filename,
                 parent_dir=parent_dir,
@@ -170,22 +170,25 @@ def main():
                 retry_sleep_range=RETRY_SLEEP_RANGE
             )
 
-            # 下载完成后记录并保存
-            full_path = os.path.join(parent_dir, filename)
-            raw_size = os.path.getsize(full_path)
-            size_str = size_display(raw_size)
-            dir_id = extract_directory_id(parent_dir)
+            if download_result in ['下载成功', '下载成功，但文件大小未知', '跳过下载']:
+                # 下载完成后记录并保存
+                full_path = os.path.join(parent_dir, filename)
+                raw_size = os.path.getsize(full_path)
+                size_str = size_display(raw_size)
+                dir_id = extract_directory_id(parent_dir)
 
-            record = {
-                "url": url,
-                "parent_dir": parent_dir,
-                "filename": filename,
-                "download_time": datetime.now().isoformat(),
-                "file_size": size_str,
-                "directory_id": dir_id
-            }
-            records.append(record)
-            save_downloaded_records(records, DOWNLOADED_JSON)
+                record = {
+                    "url": url,
+                    "parent_dir": parent_dir,
+                    "filename": filename,
+                    "download_time": datetime.now().isoformat(),
+                    "file_size": size_str,
+                    "directory_id": dir_id
+                }
+                records.append(record)
+                save_downloaded_records(records, DOWNLOADED_JSON)
+            else:
+                raise "下载失败"
 
         except Exception as ex:
             # 下载失败：记录日志

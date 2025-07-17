@@ -6,7 +6,7 @@ import json
 # https://kemono.su/api/v1/patreon/user/12733350/posts-legacy?o=50
 # 手动输入
 authors = [
-    ("fanbox", 38870890),
+    ("patreon", 2757009),
 ]
 
 # # 自动输入
