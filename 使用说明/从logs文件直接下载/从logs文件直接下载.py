@@ -19,7 +19,7 @@ from mymodule import download_file, size_display
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # 输入 txt
-INPUT_TXT = os.path.join(BASE_DIR, r"F:\CloneCode_2\KMP-Kemono-Downloader\logs\LOG - Thu Jul 17 15-17-46 UTC 2025.txt")
+INPUT_TXT = os.path.join(BASE_DIR, r"G:\CloneCode_1\KMP-Kemono-Downloader\logs\LOG - Fri Jul 18 03-14-06 UTC 2025.txt")
 
 # 已下载记录（JSON）
 DOWNLOADED_JSON = os.path.join(BASE_DIR, "downloaded.json")
@@ -45,7 +45,7 @@ PLAY_SOUND = False
 CHUNK_SIZE = 8192
 VERIFY_SSL = True
 MAX_FILENAME_LENGTH = 20
-RETRY_SLEEP_RANGE = (5, 20)
+RETRY_SLEEP_RANGE = (1, 5)
 
 # 日志配置：只记录错误
 error_logger = logging.getLogger("error")

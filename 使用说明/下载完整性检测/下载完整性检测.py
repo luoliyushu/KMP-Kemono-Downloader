@@ -2,16 +2,16 @@
 # -*- coding: utf-8 -*-
 """
 用途：
-    检测 Post 目录本地文件数与接口返回的 post.attachments 数量是否异常：
-      - attachments > 本地文件数 → 记录
-      - attachments < 本地文件数 → 检查是否存在“0.*”文件，忽略后再比，仍不匹配则记录
-      - attachments == 本地文件数 → 跳过
+    检测 Post 目录本地文件数 与 接口返回的 post.attachments + post.file 去重后总数 是否异常：
+      - 接口资源总数 > 本地文件数 → 记录异常
+      - 接口资源总数 < 本地文件数 → 忽略“0.*”文件后再比，仍不匹配则记录异常
+      - 接口资源总数 == 本地文件数 → 跳过
     支持两种模式：
       1. 手动模式：输入根目录和 api_base
-      2. 自动模式：读取 JSON 文件，自动派生根目录与 api_base
-    每检测完一个目录即刻写入 processed_dirs.json，下次运行跳过
-    异常目录汇总到 results_summary.txt，异常 URL 列表写入 exception_urls.txt，
-    所有错误写入 error_log.txt。
+      2. 自动模式：从 JSON 读取 RECORDS 并自动派生根目录与 api_base
+    每检测完一个目录才写入 processed_dirs.json；出错时不写入，下次继续重试
+    异常目录汇总到 results_summary.txt；异常页面 URL 列表写入 exception_urls.txt
+    错误日志写入 error_log.txt。
 
 依赖：
     requests 库（pip install requests）
@@ -33,16 +33,18 @@ except ImportError:
     print("缺少 requests 库，请先运行：pip install requests")
     sys.exit(1)
 
-# 全局请求头
+# 全局请求头，模拟浏览器以防被服务端拒绝
 HEADERS = {
-    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                  "AppleWebKit/537.36 (KHTML, like Gecko) "
-                  "Chrome/138.0.0.0 Safari/537.36"
+    "user-agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/138.0.0.0 Safari/537.36"
+    )
 }
 
 def setup_logger(log_path):
     """
-    配置日志记录器，将 ERROR 及以上级别日志追加写入 log_path
+    配置日志：ERROR 及以上级别追加写入 log_path
     """
     logging.basicConfig(
         filename=log_path,
@@ -54,8 +56,7 @@ def setup_logger(log_path):
 
 def prompt_mode():
     """
-    提示选择运行模式：
-      1=手动模式；2=自动模式
+    提示运行模式：1=手动；2=自动（默认1）
     """
     while True:
         m = input("请选择模式 (1=手动; 2=自动)【默认1】：").strip()
@@ -66,8 +67,8 @@ def prompt_mode():
 def prompt_manual_inputs():
     """
     手动模式：
-      输入根目录 root_dir
-      输入 api_base（形如 https://xxx/api/v1/.../post/，末尾需 '/')
+      1. 输入根目录 root_dir
+      2. 输入 api_base（必须以 '/' 结尾）
     """
     while True:
         rd = input("请输入根目录路径：").strip()
@@ -98,7 +99,7 @@ def prompt_json_path(default):
 
 def load_records_from_json(json_path):
     """
-    从 JSON 文件读取 RECORDS 列表
+    从 JSON 文件读取 "RECORDS" 列表
     """
     try:
         with open(json_path, 'r', encoding='utf-8') as f:
@@ -112,16 +113,28 @@ def load_records_from_json(json_path):
 
 def derive_api_base(user_url):
     """
-    根据用户页面 URL 计算 api_base
-      输入示例：https://kemono.party/fanbox/user/22333059
-      输出示例：https://kemono.su/api/v1/fanbox/user/22333059/post/
+    根据用户页 URL 派生 api_base
+      示例：
+        输入  : https://kemono.party/fanbox/user/12345
+        输出  : https://kemono.su/api/v1/fanbox/user/12345/post/
     """
     parsed = urlparse(user_url)
     scheme = parsed.scheme or 'https'
     path = parsed.path.rstrip('/')
-    # 固定域名为 kemono.su
-    api_base = f"{scheme}://kemono.su/api/v1{path}/post/"
-    return api_base
+    return f"{scheme}://kemono.su/api/v1{path}/post/"
+
+def api_to_page_url(api_base, post_id):
+    """
+    将 API URL 转为页面 URL
+      把 /api/v1 前缀去掉，再拼 post_id
+    """
+    parsed = urlparse(api_base)
+    scheme, netloc, path = parsed.scheme, parsed.netloc, parsed.path
+    if path.startswith('/api/v1'):
+        page_path = path[len('/api/v1'):]
+    else:
+        page_path = path
+    return f"{scheme}://{netloc}{page_path}{post_id}"
 
 def collect_post_dirs(root_dir):
     """
@@ -136,7 +149,7 @@ def collect_post_dirs(root_dir):
 
 def extract_post_id(dir_path):
     """
-    从目录路径中提取 post_id：basename 开头连续数字
+    从目录名开头提取 post_id（连续数字）
     """
     base = os.path.basename(dir_path.rstrip(os.sep))
     m = re.match(r'^(\d+)', base)
@@ -162,28 +175,52 @@ def count_local_files(dir_path):
             files.append(fn)
     return files
 
-def fetch_attachments(api_base, post_id, timeout=20, max_retries=30, backoff=3):
+def fetch_resources(api_base, post_id, timeout=20, max_retries=30, backoff=3):
     """
-    GET {api_base}{post_id} 并返回 post.attachments 列表
-    添加自定义请求头，超时重试 max_retries 次，每次等待 backoff 秒
+    获取接口返回的 post.file 和 post.attachments，合并去重后返回列表：
+      1. GET {api_base}{post_id}
+      2. 请求头包含 HEADERS
+      3. 超时重试；遇非超时错误直接抛出
+      4. 合并去重后返回各资源的 path 列表
     """
     url = urljoin(api_base, post_id)
-    for attempt in range(1, max_retries+1):
+    for attempt in range(1, max_retries + 1):
         try:
             resp = requests.get(url, timeout=timeout, headers=HEADERS)
             resp.raise_for_status()
             data = resp.json()
-            atts = data.get("post", {}).get("attachments", [])
-            return atts if isinstance(atts, list) else []
+
+            resources = []
+            seen_paths = set()
+
+            # 1. post.file（若存在 dict）
+            file_obj = data.get("post", {}).get("file")
+            if isinstance(file_obj, dict):
+                p = file_obj.get("path")
+                if p and p not in seen_paths:
+                    seen_paths.add(p)
+                    resources.append(p)
+
+            # 2. post.attachments（列表）
+            for att in data.get("post", {}).get("attachments", []) or []:
+                p = att.get("path")
+                if p and p not in seen_paths:
+                    seen_paths.add(p)
+                    resources.append(p)
+
+            return resources
+
         except requests.exceptions.Timeout:
-            print(f"  超时重试 {attempt}/{max_retries} ...")
+            print(f"  超时重试 {attempt}/{max_retries}...")
             time.sleep(backoff)
         except requests.exceptions.RequestException as e:
             # 非超时的请求错误直接抛出
             raise RuntimeError(f"请求失败 [post_id={post_id}]: {e}")
         except ValueError as e:
             raise RuntimeError(f"JSON 解析失败 [post_id={post_id}]: {e}")
-    raise RuntimeError(f"重试 {max_retries} 次超时，放弃 [post_id={post_id}]")
+
+    # 超过重试次数仍未成功
+    raise RuntimeError(f"重试 {max_retries} 次仍超时，放弃 [post_id={post_id}]")
 
 def load_processed(json_path):
     """
@@ -200,7 +237,7 @@ def load_processed(json_path):
 
 def append_processed(json_path, dir_path):
     """
-    追加单个目录到 processed_dirs.json，保持唯一
+    将已成功检测目录追加到 processed_dirs.json，保持唯一
     """
     try:
         procs = load_processed(json_path)
@@ -213,7 +250,7 @@ def append_processed(json_path, dir_path):
         logging.error(traceback.format_exc())
 
 def main():
-    # 脚本文件夹 & 默认文件路径
+    # 脚本目录 & 默认路径
     script_dir     = os.path.dirname(os.path.abspath(__file__))
     default_json   = os.path.join(script_dir, 'records.json')
     log_file       = os.path.join(script_dir, 'error_log.txt')
@@ -226,21 +263,19 @@ def main():
     # 选择模式并获取目录列表
     mode = prompt_mode()
 
-    # 存放待检测的 (目录, api_base) 对
-    to_test = []
+    to_test = []  # 存放 (目录, api_base) 元组
 
     if mode == '1':
         # 手动模式
         root_dir, api_base = prompt_manual_inputs()
-        all_dirs = collect_post_dirs(root_dir)
-        to_test = [(d, api_base) for d in all_dirs]
-
+        dirs = collect_post_dirs(root_dir)
+        to_test = [(d, api_base) for d in dirs]
     else:
         # 自动模式
         json_path = prompt_json_path(default_json)
         try:
             records = load_records_from_json(json_path)
-        except Exception as e:
+        except Exception:
             logging.error(traceback.format_exc())
             print("加载 RECORDS 失败，请查看 error_log.txt")
             sys.exit(1)
@@ -251,28 +286,26 @@ def main():
                 user_url    = rec['url']
                 artist      = rec['artist']
                 destination = rec['destination']
-                # 生成 api_base
-                api_base = derive_api_base(user_url)
-                # 根目录 = destination/artist
-                root_dir = os.path.join(destination, artist)
-                dirs = collect_post_dirs(root_dir)
-                to_test.extend([(d, api_base) for d in dirs])
+                api_base    = derive_api_base(user_url)
+                root_dir    = os.path.join(destination, artist)
+                dirs        = collect_post_dirs(root_dir)
+                to_test.extend((d, api_base) for d in dirs)
             except Exception as e:
                 logging.error(f"自动模式处理记录失败 [{rec}]: {e}")
                 logging.error(traceback.format_exc())
 
     # 过滤已处理目录
     processed = set(load_processed(processed_file))
-    to_test = [(d, a) for (d, a) in to_test if d not in processed]
+    to_test = [(d, a) for d, a in to_test if d not in processed]
 
     if not to_test:
         print("没有新目录需要检测，程序退出。")
         return
 
-    # 初始化 summary 与 exception 文件
+    # 初始化 summary & 清空 exception_urls
     if not os.path.isfile(summary_file):
         with open(summary_file, 'w', encoding='utf-8') as fw:
-            fw.write("目录 | post_id | attachments_count | local_count | 备注\n")
+            fw.write("目录 | post_id | 接口资源数 | 本地文件数 | 备注\n")
             fw.write("-" * 100 + "\n")
     # 清空或创建 exception_urls.txt
     open(exception_file, 'w', encoding='utf-8').close()
@@ -286,59 +319,54 @@ def main():
             pid       = extract_post_id(dpath)
             files     = count_local_files(dpath)
             local_cnt = len(files)
-            atts      = fetch_attachments(api_base, pid)
+            resources = fetch_resources(api_base, pid)
+            res_cnt   = len(resources)
+
+            note = ""
+            if res_cnt > local_cnt:
+                note = f"接口({res_cnt}) > 本地({local_cnt})"
+            elif res_cnt < local_cnt:
+                zero_files = [f for f in files if os.path.splitext(f)[0] == '0']
+                if zero_files:
+                    new_cnt = local_cnt - 1
+                    if res_cnt == new_cnt:
+                        print(f"  跳过：忽略'{zero_files[0]}'后匹配({res_cnt}=={new_cnt})")
+                    else:
+                        note = f"忽略0.*后不匹配({res_cnt}!={new_cnt})"
+                else:
+                    note = f"接口({res_cnt}) < 本地({local_cnt})且无0.*可忽略"
+            else:
+                print(f"  跳过：数量匹配({res_cnt}=={local_cnt})")
+
+            if note:
+                page_url = api_to_page_url(api_base, pid)
+                print(f"  ➤ 异常: {note}，记录 页面URL：{page_url}")
+                # 写入 summary
+                try:
+                    with open(summary_file, 'a', encoding='utf-8') as fw:
+                        fw.write(f"{dpath} | {pid} | {res_cnt} | {local_cnt} | {note}\n")
+                except Exception as e:
+                    logging.error(f"写入 summary 失败 [{dpath}]: {e}")
+                    logging.error(traceback.format_exc())
+                # 写入页面 URL 至 exception_urls.txt
+                try:
+                    with open(exception_file, 'a', encoding='utf-8') as ef:
+                        ef.write(page_url + "\n")
+                except Exception as e:
+                    logging.error(f"写入 exception_urls.txt 失败 [{page_url}]: {e}")
+                    logging.error(traceback.format_exc())
+
+            # 成功检测后标记 processed
+            append_processed(processed_file, dpath)
+
         except Exception as e:
+            # 出错时仅记录日志，不标记 processed，下次继续重试
             logging.error(f"处理失败 [{dpath}]: {e}")
             logging.error(traceback.format_exc())
-            # 无论成功与否，都标记为已处理，避免下次再检测
-            append_processed(processed_file, dpath)
-            continue
-
-        att_cnt = len(atts)
-        note = ""
-
-        # 判断条件
-        if att_cnt > local_cnt:
-            note = f"attachments({att_cnt}) > 本地({local_cnt})"
-        elif att_cnt < local_cnt:
-            # 查看是否有 “0.*” 文件可忽略
-            zero_files = [f for f in files if os.path.splitext(f)[0] == '0']
-            if zero_files:
-                new_cnt = local_cnt - 1
-                if att_cnt == new_cnt:
-                    print(f"  跳过：忽略'{zero_files[0]}'后匹配({att_cnt}=={new_cnt})")
-                else:
-                    note = f"忽略0.*后不匹配({att_cnt}!={new_cnt})"
-            else:
-                note = f"attachments({att_cnt}) < 本地({local_cnt})且无0.*可忽略"
-        else:
-            # 完全匹配，跳过记录
-            print(f"  跳过：数量匹配({att_cnt}=={local_cnt})")
-
-        # 若异常则记录 summary + exception URL
-        if note:
-            full_url = api_base + pid
-            print(f"  ➤ 异常: {note}，记录 URL：{full_url}")
-            # 写入汇总结果
-            try:
-                with open(summary_file, 'a', encoding='utf-8') as fw:
-                    fw.write(f"{dpath} | {pid} | {att_cnt} | {local_cnt} | {note}\n")
-            except Exception as e:
-                logging.error(f"写入 summary 失败 [{dpath}]: {e}")
-                logging.error(traceback.format_exc())
-            # 写入 Exception URL
-            try:
-                with open(exception_file, 'a', encoding='utf-8') as ef:
-                    ef.write(full_url + "\n")
-            except Exception as e:
-                logging.error(f"写入 exception_urls.txt 失败 [{full_url}]: {e}")
-                logging.error(traceback.format_exc())
-
-        # 标记已处理
-        append_processed(processed_file, dpath)
+            print(f"  错误: {e}，此目录保留，下次重试。")
 
     print(f"\n检测完成。异常结果已保存：{summary_file}")
-    print(f"异常 URL 已保存：{exception_file}")
+    print(f"异常页面 URL 已保存：{exception_file}")
 
 if __name__ == '__main__':
     main()
