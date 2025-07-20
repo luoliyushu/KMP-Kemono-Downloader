@@ -3,22 +3,31 @@
 """
 用途：
     检测 Post 目录本地文件数 与 接口返回的
-      post.attachments + post.file + post.content 中<img>标签数量
+      post.attachments + post.file + post.content 中有效 <img> 标签数量
     合并后的数量 是否异常：
       - 接口资源总数 > 本地文件数 → 记录异常
-      - 接口资源总数 < 本地文件数 → 忽略“0.*”文件后再比，仍不匹配则记录异常
+      - 接口资源总数 < 本地文件数 → 忽略“0.*”文件后再比，
+        仍不匹配则记录异常
       - 接口资源总数 == 本地文件数 → 跳过
     支持两种模式：
       1. 手动模式：输入根目录和 api_base
       2. 自动模式：从 JSON 读取 RECORDS 并自动派生根目录与 api_base
     可选功能：
       - 是否对 post.attachments + post.file 结果去重（默认不去重）
-    检测完成一个目录后写入 processed_dirs.json；出错不写，下次继续重试
-    异常目录汇总到 results_summary.txt（追加）；异常页面 URL 列表追加到 exception_urls.txt
+      - 是否为“忽略0.*后不匹配”项生成额外的 summary 和 exception 文件（默认开启）
+    检测完成一个目录后写入 processed_dirs.json；
+    出错不写，下次继续重试
+    异常目录记录到 results_summary.txt（追加）；
+    异常页面 URL 列表记录到 exception_urls.txt（追加）
+    “忽略0.*后不匹配”项另外记录到：
+      - results_zero_mismatch_summary.txt
+      - exception_zero_mismatch_urls.txt
+    如果某条记录属于“忽略0.*后不匹配”，则仅写入上述两个零匹配文件，
+    不写入主 summary 和 exception。
     错误日志写入 error_log.txt。
 
 依赖：
-    requests 库（pip install requests）
+    requests, bs4 库（pip install requests bs4）
 """
 
 import os
@@ -38,7 +47,7 @@ except ImportError:
     print("缺少 requests 库，请先运行：pip install requests")
     sys.exit(1)
 
-# 全局请求头，模拟浏览器以防被服务端拒绝
+# 全局请求头
 HEADERS = {
     "user-agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -60,9 +69,7 @@ def setup_logger(log_path):
     )
 
 def prompt_mode():
-    """
-    提示运行模式：1=手动；2=自动（默认1）
-    """
+    """提示运行模式：1=手动；2=自动（默认1）"""
     while True:
         m = input("请选择模式 (1=手动; 2=自动)【默认1】：").strip()
         if m in ('', '1', '2'):
@@ -70,21 +77,29 @@ def prompt_mode():
         print("请输入 1 或 2。")
 
 def prompt_dedup_option():
-    """
-    提示是否启用去重（post.attachments + post.file）
-    默认不去重，输入 y 则启用
-    """
+    """提示是否启用去重（post.attachments + post.file），默认不去重"""
     while True:
         d = input("是否启用去重(post.attachments 与 post.file)? (y/N)【N】：").strip().lower()
-        if d in ('y', 'n', ''):
+        if d in ('y','n',''):
             return d == 'y'
         print("请输入 y 或 n。")
+
+def prompt_zero_option():
+    """
+    提示是否为“忽略0.*后不匹配”项生成额外文件
+    默认生成，输入 n 则关闭
+    """
+    while True:
+        z = input("是否生成“忽略0.*后不匹配”额外文件? (Y/n)【Y】：").strip().lower()
+        if z in ('y','n',''):
+            return z != 'n'
+        print("请输入 Y 或 n。")
 
 def prompt_manual_inputs():
     """
     手动模式：
-      1. 输入根目录 root_dir
-      2. 输入 api_base（必须以 '/' 结尾）
+      输入根目录 root_dir
+      输入 api_base（必须以 '/' 结尾）
     """
     while True:
         rd = input("请输入根目录路径：").strip()
@@ -130,9 +145,9 @@ def load_records_from_json(json_path):
 def derive_api_base(user_url):
     """
     根据用户页 URL 派生 api_base
-      示例：
-        输入  : https://kemono.party/fanbox/user/12345
-        输出  : https://kemono.su/api/v1/fanbox/user/12345/post/
+    示例：
+      https://kemono.party/fanbox/user/12345
+      → https://kemono.su/api/v1/fanbox/user/12345/post/
     """
     parsed = urlparse(user_url)
     scheme = parsed.scheme or 'https'
@@ -140,10 +155,7 @@ def derive_api_base(user_url):
     return f"{scheme}://kemono.su/api/v1{path}/post/"
 
 def api_to_page_url(api_base, post_id):
-    """
-    将 API URL 转为页面 URL
-      去掉 '/api/v1' 前缀，再拼 post_id
-    """
+    """将 API URL 转为页面 URL"""
     parsed = urlparse(api_base)
     scheme, netloc, path = parsed.scheme, parsed.netloc, parsed.path
     if path.startswith('/api/v1'):
@@ -155,9 +167,7 @@ def api_to_page_url(api_base, post_id):
     return f"{scheme}://{netloc}{page_path}{post_id}"
 
 def collect_post_dirs(root_dir):
-    """
-    递归遍历 root_dir，收集所有目录名以数字开头的子目录
-    """
+    """递归遍历 root_dir，收集所有以数字开头的子目录路径"""
     result = []
     for cur, _, _ in os.walk(root_dir):
         name = os.path.basename(cur.rstrip(os.sep))
@@ -166,9 +176,7 @@ def collect_post_dirs(root_dir):
     return result
 
 def extract_post_id(dir_path):
-    """
-    从目录名开头提取 post_id（连续数字）
-    """
+    """从目录名开头提取 post_id（连续数字）"""
     base = os.path.basename(dir_path.rstrip(os.sep))
     m = re.match(r'^(\d+)', base)
     if not m:
@@ -184,26 +192,19 @@ def count_local_files(dir_path):
         names = os.listdir(dir_path)
     except Exception as e:
         raise RuntimeError(f"读取目录失败: {e}")
-    files = []
-    for fn in names:
-        if fn in ("post__comments.txt", "post__content.txt"):
-            continue
-        full = os.path.join(dir_path, fn)
-        if os.path.isfile(full):
-            files.append(fn)
-    return files
+    return [
+        fn for fn in names
+        if fn not in ("post__comments.txt", "post__content.txt")
+           and os.path.isfile(os.path.join(dir_path, fn))
+    ]
 
 def fetch_resources(api_base, post_id, dedup=False, timeout=20, max_retries=30, backoff=3):
     """
-    获取接口返回的 post.file、post.attachments 以及 post.content 中 <img> 标签数量
-      - GET {api_base}{post_id}
-      - 请求头包含 HEADERS
-      - 对请求失败或 JSON 解析失败进行重试，重试 max_retries 次
-      - 合并 post.file（单个）与 post.attachments（列表）返回路径列表
-      - 解析 post.content 字段，统计 <img> 标签个数
-      - 如果 dedup=True，则对合并的路径列表去重
-    返回：
-      tuple(merged_paths_list, img_tag_count)
+    获取 post.file、post.attachments，以及 post.content 中有效 <img> 标签数量
+    - 重试 HTTP 请求和 JSON 解析
+    - 合并 file/attachments 路径，去重可选
+    - 解析 content HTML，统计 src 合法的 <img> 标签
+    返回 (merged_paths_list, img_count)
     """
     url = urljoin(api_base, post_id)
     for attempt in range(1, max_retries + 1):
@@ -226,59 +227,58 @@ def fetch_resources(api_base, post_id, dedup=False, timeout=20, max_retries=30, 
                 if p:
                     merged.append(p)
 
-            # 3. 如需去重，则仅保留首次出现的路径
+            # 3. 去重（可选）
             if dedup:
-                seen = set()
-                unique = []
+                seen, uniq = set(), []
                 for p in merged:
                     if p not in seen:
                         seen.add(p)
-                        unique.append(p)
-                merged = unique
+                        uniq.append(p)
+                merged = uniq
 
-            # 4. 解析 post.content，统计 <img> 标签数量
+            # 4. 解析 post.content，统计有效 <img> 标签数量
             img_count = 0
             try:
-                content_html = data.get("post", {}).get("content", "")
-                # 用 BeautifulSoup 解析 HTML
+                content_html = data.get("post", {}).get("content", "") or ""
                 soup = BeautifulSoup(content_html, 'html.parser')
-                img_tags = soup.find_all('img')
-                img_count = len(img_tags)
+                imgs = soup.find_all('img')
+                valid_imgs = []
+                for img in imgs:
+                    src = img.get('src', '').strip()
+                    # 过滤无效链接：空字符串、'None'、非法格式等
+                    if not src or src.lower() == 'none':
+                        continue
+                    # 如果需要更严格校验，可在此增加：
+                    # e.g., src.startswith('http') or src.startswith('/')
+                    valid_imgs.append(img)
+                img_count = len(valid_imgs)
             except Exception:
-                # 解析过程若出错，不终止，img_count 保持 0
-                logging.warning(f"解析 post.content 时出错，忽略 content 图片统计 [post_id={post_id}]")
+                logging.warning(f"解析 post.content 时出错，忽略内容图片统计 [post_id={post_id}]")
 
             return merged, img_count
 
         except (requests.exceptions.RequestException, ValueError) as e:
-            # 包括超时、HTTP错误和 JSON 解析错误，均重试
             if attempt < max_retries:
                 print(f"  请求/解析失败: {e}，重试 {attempt}/{max_retries}...")
                 time.sleep(backoff)
                 continue
-            # 超过重试次数后抛出
             raise RuntimeError(f"重试 {max_retries} 次仍失败 [post_id={post_id}]: {e}")
 
-    # 理论上不会到达这里
     raise RuntimeError(f"无法获取资源 [post_id={post_id}]")
 
 def load_processed(json_path):
-    """
-    加载已处理目录列表（JSON 数组），不存在返回空列表
-    """
+    """加载已处理目录列表（JSON 数组），不存在返回空列表"""
     if not os.path.isfile(json_path):
         return []
     try:
         with open(json_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
         return data if isinstance(data, list) else []
-    except Exception:
+    except:
         return []
 
 def append_processed(json_path, dir_path):
-    """
-    将已成功检测目录追加到 processed_dirs.json，保持唯一
-    """
+    """追加已成功检测目录到 processed_dirs.json，保持唯一"""
     try:
         procs = load_processed(json_path)
         if dir_path not in procs:
@@ -291,27 +291,29 @@ def append_processed(json_path, dir_path):
 
 def main():
     # 脚本目录 & 默认路径
-    script_dir     = os.path.dirname(os.path.abspath(__file__))
-    default_json   = os.path.join(script_dir, 'records.json')
-    log_file       = os.path.join(script_dir, 'error_log.txt')
-    summary_file   = os.path.join(script_dir, 'results_summary.txt')
-    processed_file = os.path.join(script_dir, 'processed_dirs.json')
-    exception_file = os.path.join(script_dir, 'exception_urls.txt')
+    script_dir          = os.path.dirname(os.path.abspath(__file__))
+    default_json        = os.path.join(script_dir, 'records.json')
+    log_file            = os.path.join(script_dir, 'error_log.txt')
+    summary_file        = os.path.join(script_dir, 'results_summary.txt')
+    exception_file      = os.path.join(script_dir, 'exception_urls.txt')
+    zero_summary_file   = os.path.join(script_dir, 'results_zero_mismatch_summary.txt')
+    zero_exception_file = os.path.join(script_dir, 'exception_zero_mismatch_urls.txt')
+    processed_file      = os.path.join(script_dir, 'processed_dirs.json')
 
     # 配置错误日志
     setup_logger(log_file)
 
-    # 选择模式 & 去重选项
-    mode  = prompt_mode()
-    dedup = prompt_dedup_option()
+    # 交互获取选项
+    mode        = prompt_mode()
+    dedup       = prompt_dedup_option()
+    zero_option = prompt_zero_option()
 
-    # 根据模式收集待检测目录列表 (目录路径, api_base)
+    # 构建待测试列表
     to_test = []
-    if mode == '1':  # 手动模式
+    if mode == '1':
         root_dir, api_base = prompt_manual_inputs()
-        dirs = collect_post_dirs(root_dir)
-        to_test = [(d, api_base) for d in dirs]
-    else:             # 自动模式
+        to_test = [(d, api_base) for d in collect_post_dirs(root_dir)]
+    else:
         json_path = prompt_json_path(default_json)
         try:
             records = load_records_from_json(json_path)
@@ -319,51 +321,49 @@ def main():
             logging.error(traceback.format_exc())
             print("加载 RECORDS 失败，请查看 error_log.txt")
             sys.exit(1)
-
-        # 逐条记录生成 (目录, api_base)
         for rec in records:
             try:
-                user_url    = rec['url']
-                artist      = rec['artist']
-                destination = rec['destination']
-                api_base    = derive_api_base(user_url)
-                root_dir    = os.path.join(destination, artist)
-                dirs        = collect_post_dirs(root_dir)
-                to_test.extend((d, api_base) for d in dirs)
+                base = derive_api_base(rec['url'])
+                rd   = os.path.join(rec['destination'], rec['artist'])
+                for d in collect_post_dirs(rd):
+                    to_test.append((d, base))
             except Exception as e:
-                logging.error(f"自动模式处理记录失败 [{rec}]: {e}")
+                logging.error(f"自动模式处理失败 [{rec}]: {e}")
                 logging.error(traceback.format_exc())
 
-    # 过滤已处理目录
+    # 过滤已处理
     processed = set(load_processed(processed_file))
-    to_test = [(d, a) for d, a in to_test if d not in processed]
-
+    to_test = [(d, b) for d, b in to_test if d not in processed]
     if not to_test:
-        print("没有新目录需要检测，程序退出。")
+        print("无新目录，程序退出。")
         return
 
-    # 初始化 results_summary.txt（若不存在则写表头）
+    # 初始化文件（若不存在则创建并写表头；存在则保留原内容）
     if not os.path.isfile(summary_file):
         with open(summary_file, 'w', encoding='utf-8') as fw:
             fw.write("目录 | post_id | 接口资源数 | 本地文件数 | 备注\n")
             fw.write("-" * 100 + "\n")
-    # 初始化 exception_urls.txt（若不存在创建空文件；存在保留内容，不清空）
     if not os.path.isfile(exception_file):
         open(exception_file, 'w', encoding='utf-8').close()
+    if zero_option:
+        if not os.path.isfile(zero_summary_file):
+            with open(zero_summary_file, 'w', encoding='utf-8') as fz:
+                fz.write("目录 | post_id | 接口资源数 | 本地文件数 | 备注\n")
+                fz.write("-" * 100 + "\n")
+        if not os.path.isfile(zero_exception_file):
+            open(zero_exception_file, 'w', encoding='utf-8').close()
 
+    # 执行检测
     total = len(to_test)
-
-    # 逐个检测
     for idx, (dpath, api_base) in enumerate(to_test, start=1):
         print(f"[{idx}/{total}] 检测：{dpath}")
         try:
-            pid         = extract_post_id(dpath)
-            files       = count_local_files(dpath)
-            local_cnt   = len(files)
+            pid       = extract_post_id(dpath)
+            files     = count_local_files(dpath)
+            local_cnt = len(files)
 
-            # 获取 attachments+file 列表 & content 中 img 标签数量
+            # 获取附件路径列表与有效内容图片数量
             resources, img_count = fetch_resources(api_base, pid, dedup=dedup)
-            # 总资源数 = 附件数 + 文本内容 img 数
             res_cnt = len(resources) + img_count
 
             note = ""
@@ -384,35 +384,51 @@ def main():
 
             if note:
                 page_url = api_to_page_url(api_base, pid)
-                print(f"  ➤ 异常: {note}，记录 页面URL：{page_url}")
+                print(f"  ➤ 异常: {note}，页面URL：{page_url}")
 
-                # 写入 summary（追加）
-                try:
-                    with open(summary_file, 'a', encoding='utf-8') as fw:
-                        fw.write(f"{dpath} | {pid} | {res_cnt} | {local_cnt} | {note}\n")
-                except Exception as e:
-                    logging.error(f"写入 {summary_file} 失败 [{dpath}]: {e}")
-                    logging.error(traceback.format_exc())
+                # 如果是“忽略0.*后不匹配”且开启 zero_option，
+                # 仅写入零匹配文件，否则写入主 summary 与 exception
+                if zero_option and note.startswith("忽略0.*后不匹配"):
+                    try:
+                        with open(zero_summary_file, 'a', encoding='utf-8') as fz:
+                            fz.write(f"{dpath} | {pid} | {res_cnt} | {local_cnt} | {note}\n")
+                    except Exception as e:
+                        logging.error(f"写入 {zero_summary_file} 失败 [{dpath}]: {e}")
+                        logging.error(traceback.format_exc())
+                    try:
+                        with open(zero_exception_file, 'a', encoding='utf-8') as ez:
+                            ez.write(page_url + "\n")
+                    except Exception as e:
+                        logging.error(f"写入 {zero_exception_file} 失败 [{page_url}]: {e}")
+                        logging.error(traceback.format_exc())
+                else:
+                    try:
+                        with open(summary_file, 'a', encoding='utf-8') as fw:
+                            fw.write(f"{dpath} | {pid} | {res_cnt} | {local_cnt} | {note}\n")
+                    except Exception as e:
+                        logging.error(f"写入 {summary_file} 失败 [{dpath}]: {e}")
+                        logging.error(traceback.format_exc())
+                    try:
+                        with open(exception_file, 'a', encoding='utf-8') as ef:
+                            ef.write(page_url + "\n")
+                    except Exception as e:
+                        logging.error(f"写入 {exception_file} 失败 [{page_url}]: {e}")
+                        logging.error(traceback.format_exc())
 
-                # 写入异常页面 URL（追加）
-                try:
-                    with open(exception_file, 'a', encoding='utf-8') as ef:
-                        ef.write(page_url + "\n")
-                except Exception as e:
-                    logging.error(f"写入 {exception_file} 失败 [{page_url}]: {e}")
-                    logging.error(traceback.format_exc())
-
-            # 成功检测后标记 processed
+            # 标记已处理
             append_processed(processed_file, dpath)
 
         except Exception as e:
-            # 处理目录过程中出错，不标记 processed，下次重试
             logging.error(f"处理失败 [{dpath}]: {e}")
             logging.error(traceback.format_exc())
-            print(f"  错误: {e}，此目录保留，下次重试。")
+            print(f"  错误: {e}，保留此目录，下次重试。")
 
-    print(f"\n检测完成。异常结果已追加到：{summary_file}")
-    print(f"异常页面 URL 已追加到：{exception_file}")
+    print("\n检测完成。")
+    print(f"主结果已追加到：{summary_file}")
+    print(f"主异常页面 URL 已追加到：{exception_file}")
+    if zero_option:
+        print(f"零匹配 summary: {zero_summary_file}")
+        print(f"零匹配 URL 列表: {zero_exception_file}")
 
 if __name__ == '__main__':
     main()
