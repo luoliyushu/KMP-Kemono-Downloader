@@ -6,18 +6,20 @@ cleanup_duplicates.py
 环境：Windows 11，Python 3.x
 依赖：Send2Trash（pip install Send2Trash）
 说明：
-  链接格式中“fanbox”部分不再固定，脚本改用通用正则来提取 user_id 和 post_id。
-  脚本启动时通过 input() 提示用户输入文件路径，而非命令行参数。
+  - 链接格式中“fanbox”部分不再固定，脚本改用通用正则来提取 user_id 和 post_id。
+  - 启动时通过 input() 提示用户输入文件路径，不使用命令行参数。
+  - 控制台实时显示处理进度与百分比进度条。
 """
 
 import os
 import sys
 import json
 import traceback
-from pathlib import Path
-from send2trash import send2trash
 import re
 import datetime
+import time
+from pathlib import Path
+from send2trash import send2trash
 
 def log_message(log_file: Path, message: str):
     """
@@ -48,19 +50,32 @@ def main(txt_path: Path, json_path: Path):
                 user_map[m.group(1)] = rec
 
         # 3. 读取 TXT 文件，提取每行的 user_id 和 post_id
+        # 通用正则：匹配任意托管域名、任意一级目录，再 /user/{user_id}/post/{post_id}
         url_pattern = re.compile(r"https?://[^/]+/[^/]+/user/(\d+)/post/(\d+)")
         with txt_path.open("r", encoding="utf-8") as f:
             lines = [line.strip() for line in f if line.strip()]
 
-        for line in lines:
+        total = len(lines)
+        print(f"共 {total} 条链接，开始处理...\n")
+
+        # 4. 逐条处理并显示进度
+        for idx, line in enumerate(lines, 1):
+            # 4.1 控制台进度输出
+            percent = int(idx / total * 100)
+            bar_len = 20
+            filled = int(bar_len * percent / 100)
+            bar = "█" * filled + "-" * (bar_len - filled)
+            print(f"[{idx}/{total}] 进度: [{bar}] {percent}%")
+            print(f"正在处理: {line}\n")
+
+            # 4.2 提取 user_id 和 post_id
             m = url_pattern.match(line)
             if not m:
                 log_message(log_file, f"无法解析 URL（非标准托管类型），跳过: {line}")
                 continue
-
             user_id, post_id = m.group(1), m.group(2)
 
-            # 4. 在 JSON 中查找对应记录
+            # 4.3 在 JSON 中查找对应记录
             rec = user_map.get(user_id)
             if not rec:
                 log_message(log_file, f"JSON 中未找到 user_id={user_id}，跳过 URL: {line}")
@@ -77,7 +92,7 @@ def main(txt_path: Path, json_path: Path):
                 log_message(log_file, f"artist 目录不存在: {artist_dir}")
                 continue
 
-            # 5. 查找同一 post_id 的所有下载子目录
+            # 4.4 查找同一 post_id 的所有下载子目录
             same_id_dirs = []
             for child in artist_dir.iterdir():
                 if child.is_dir() and child.name.startswith(post_id + " "):
@@ -87,7 +102,7 @@ def main(txt_path: Path, json_path: Path):
                 log_message(log_file, f"{artist_dir} 中 post_id={post_id} 共 {len(same_id_dirs)} 个，无需处理")
                 continue
 
-            # 6. 按创建时间选最新的保留，其他移至回收站
+            # 4.5 按创建时间选最新的保留，其他移至回收站
             times = {p: p.stat().st_ctime for p in same_id_dirs}
             keep_dir = max(times, key=times.get)
             del_dirs = [p for p in same_id_dirs if p != keep_dir]
@@ -99,12 +114,18 @@ def main(txt_path: Path, json_path: Path):
                     log_message(log_file, f"移至回收站: {d}")
                 except Exception:
                     err = traceback.format_exc()
-                    log_message(log_file, f"删除失败: {d}，错误详情:\n{err}")
+                    log_message(log_file, f"删除失败: {d}\n错误详情:\n{err}")
+
+            # 可选：让输出更清晰，略微暂停
+            time.sleep(0.1)
+
+        print("\n全部处理完成，详见 cleanup.log。")
 
     except Exception:
         # 捕获所有意外异常并记录
         err = traceback.format_exc()
         log_message(log_file, f"脚本执行异常:\n{err}")
+        print("发生致命错误，已记录至日志。")
         sys.exit(1)
 
 if __name__ == "__main__":
