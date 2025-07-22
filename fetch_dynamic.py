@@ -222,7 +222,7 @@ def fetch_dynamic_content(
     url,
     root_selector='div.transition-preload#root',
     target_selector=None,
-    timeout=20,
+    timeout=40,
     use_proxy=False,
     proxy_url=None,
     headers=None,
