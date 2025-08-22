@@ -5,18 +5,18 @@ import json
 # https://kemono.su/api/v1/fanbox/user/1977144/posts-legacy?o=100
 # https://kemono.su/api/v1/patreon/user/12733350/posts-legacy?o=50
 # 手动输入
-authors = [
-    ("patreon", 2757009),
-]
+# authors = [
+#     ("patreon", 2757009),
+# ]
 
-# # 自动输入
-# authors = []
-# with open(r"G:\CloneCode_1\KMP-Kemono-Downloader\使用说明\数据库备份\Parent2_2025-02-22.json", "r", encoding="utf-8") as f:
-#     json_data = json.load(f).get("RECORDS")
-#     for item in json_data:
-#         url_split = item.get("url").split("/")
-#         if url_split[-3] and url_split[-1]:
-#             authors.append((url_split[-3], int(url_split[-1])))
+# 自动输入
+authors = []
+with open(r"C:\Users\lenovo\Desktop\Parent2.json", "r", encoding="utf-8") as f:
+    json_data = json.load(f).get("RECORDS")
+    for item in json_data:
+        url_split = item.get("url").split("/")
+        if url_split[-3] and url_split[-1]:
+            authors.append((url_split[-3], int(url_split[-1])))
 
 
        
@@ -28,6 +28,7 @@ for author_sponsor, author_id in authors:
     page = 1
 
     api_url = f"https://kemono.su/api/v1/{author_sponsor}/user/{author_id}/posts-legacy"
+    print(api_url)
     response = requests.get(api_url, headers=headers)
     info_text = f"{author_id}，第{page}页"
     if response.status_code != 200:
