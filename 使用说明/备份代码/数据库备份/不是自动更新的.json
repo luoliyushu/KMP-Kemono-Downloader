@@ -1,0 +1,18 @@
+{
+    "RECORDS": [
+        {
+            "url": "https://kemono.su/fantia/user/7946",
+            "artist": "MUKむっくサークルMonsieuR",
+            "type": "Kemono",
+            "latest": "https://kemono.su/fantia/user/7946/post/1736864",
+            "destination": "G:\\CloneCode_1\\KMP-Kemono-Downloader\\download_not_update\\"
+        },
+        {
+            "url": "https://kemono.su/fantia/user/21609",
+            "artist": "あるぱかくらぶ",
+            "type": "Kemono",
+            "latest": "https://kemono.su/fantia/user/21609/post/789868",
+            "destination": "G:\\CloneCode_1\\KMP-Kemono-Downloader\\download_not_update\\"
+        }
+    ]
+}

@@ -19,7 +19,7 @@ from mymodule import download_file, size_display
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # 输入 txt
-INPUT_TXT = os.path.join(BASE_DIR, r"G:\CloneCode_1\KMP-Kemono-Downloader\logs\LOG - Mon Jul 21 11-00-17 UTC 2025.txt")
+INPUT_TXT = os.path.join(BASE_DIR, r"G:\CloneCode_1\KMP-Kemono-Downloader\logs\LOG - Fri Jan 16 05-09-01 UTC 2026.txt")
 
 # 已下载记录（JSON）
 DOWNLOADED_JSON = os.path.join(BASE_DIR, "downloaded.json")
