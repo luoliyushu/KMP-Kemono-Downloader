@@ -185,7 +185,7 @@ def extract_post_id(dir_path):
 
 def count_local_files(dir_path):
     """
-    列出目录下所有常规文件，排除 post__comments.txt 和 post__content.txt
+    列出目录下所有常规文件，排除 post__comments.txt、post__content.txt、file__text.txt、discord__content.txt
     返回文件名列表
     """
     try:
@@ -194,7 +194,7 @@ def count_local_files(dir_path):
         raise RuntimeError(f"读取目录失败: {e}")
     return [
         fn for fn in names
-        if fn not in ("post__comments.txt", "post__content.txt")
+        if fn not in ("post__comments.txt", "post__content.txt", "file__text.txt", "discord__content.txt")
            and os.path.isfile(os.path.join(dir_path, fn))
     ]
 
