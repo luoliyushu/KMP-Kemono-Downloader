@@ -49,11 +49,8 @@ except ImportError:
 
 # 全局请求头
 HEADERS = {
-    "user-agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/138.0.0.0 Safari/537.36"
-    )
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+    "Accept": "text/css"
 }
 
 def setup_logger(log_path):
@@ -147,12 +144,12 @@ def derive_api_base(user_url):
     根据用户页 URL 派生 api_base
     示例：
       https://kemono.party/fanbox/user/12345
-      → https://kemono.su/api/v1/fanbox/user/12345/post/
+      → https://kemono.cr/api/v1/fanbox/user/12345/post/
     """
     parsed = urlparse(user_url)
     scheme = parsed.scheme or 'https'
     path = parsed.path.rstrip('/')
-    return f"{scheme}://kemono.su/api/v1{path}/post/"
+    return f"{scheme}://kemono.cr/api/v1{path}/post/"
 
 def api_to_page_url(api_base, post_id):
     """将 API URL 转为页面 URL"""
@@ -325,6 +322,7 @@ def main():
             try:
                 base = derive_api_base(rec['url'])
                 rd   = os.path.join(rec['destination'], rec['artist'])
+                print(f"处理记录：\n\t目录：{rd}\n\tapi_base：{base}")
                 for d in collect_post_dirs(rd):
                     to_test.append((d, base))
             except Exception as e:
@@ -363,7 +361,7 @@ def main():
             local_cnt = len(files)
 
             # 获取附件路径列表与有效内容图片数量
-            resources, img_count = fetch_resources(api_base, pid, dedup=dedup)
+            resources, img_count = fetch_resources(api_base, pid, dedup=dedup, backoff=10)
             res_cnt = len(resources) + img_count
 
             note = ""
