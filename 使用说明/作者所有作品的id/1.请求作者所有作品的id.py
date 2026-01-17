@@ -28,7 +28,7 @@ with open(json_file, "r", encoding="utf-8") as f:
     for item in records:
         url = item.get("url", "")
         parts = url.split("/")
-        # URL 示例: https://kemono.su/api/v1/patreon/user/12733350/...
+        # URL 示例: https://kemono.cr/api/v1/patreon/user/12733350/...
         # 提取倒数第3段作为平台标识，最后一段作为作者 ID
         if len(parts) >= 4:
             sponsor = parts[-3]
@@ -116,7 +116,7 @@ for sponsor, author_id in authors:
         # 收集每条帖子的 ID 及访问链接
         for post in posts:
             pid = post.get("id")
-            post_url = f"https://kemono.su/{sponsor}/user/{author_id}/post/{pid}"
+            post_url = f"https://kemono.cr/{sponsor}/user/{author_id}/post/{pid}"
             collected.append((pid, post_url))
 
         # 递增 offset，准备抓取下一页
