@@ -247,7 +247,12 @@ def fetch_resources(api_base, post_id, dedup=False, timeout=20, max_retries=30, 
                         continue
                     # 如果需要更严格校验，可在此增加：
                     # e.g., src.startswith('http') or src.startswith('/')
-                    valid_imgs.append(img)
+                    # 请求图片是否有效
+                    try:
+                        requests.get(src, timeout=8, headers=HEADERS).raise_for_status()
+                        valid_imgs.append(img)
+                    except requests.RequestException:
+                        continue
                 img_count = len(valid_imgs)
             except Exception:
                 logging.warning(f"解析 post.content 时出错，忽略内容图片统计 [post_id={post_id}]")
